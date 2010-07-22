@@ -26,6 +26,14 @@ function commandLine( path ){
 		}
 	}
 
+	function numRows( ){
+		return process.binding('stdio').getRows();
+	}
+
+	function numColumns( ){
+		return process.binding('stdio').getColumns();
+	}
+
 	function parseCmdLine( cmdLine ){
 		pipedCmds		= cmdLine.trim().split( "|" );
 		startingCmd		= pipedCmds[0].trim();
@@ -121,4 +129,4 @@ function commandLine( path ){
 	showConsole();
 };
 
-commandLine( "/path/to/charlie/bin/:/another/path/to/stuff/:/tmp/foobar/" );
+commandLine( "/root/charlie/bin/:/path/to/charlie/bin/:/another/path/to/stuff/:/tmp/foobar/" );
