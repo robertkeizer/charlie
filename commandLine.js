@@ -41,6 +41,9 @@ function commandLine( path ){
 		startingCmdParts	= startingCmd.split( " " );
 		startingCmdName		= startingCmdParts[0].trim();
 		startingCmdArguments	= [];
+
+		// Check here for redirection..
+		
 		for( startingCmdNum=1;startingCmdNum<startingCmdParts.length;startingCmdNum++ ){
 			startingCmdArguments[startingCmdNum] = startingCmdParts[startingCmdNum];
 		}
@@ -67,11 +70,6 @@ function commandLine( path ){
 				pipedCmdArgs[k] = pipedCmdParts[k];
 			}
 
-			// if this is the last piped command ( or the last command at all ) - check for redirection.
-			if( pipedCmdNum == pipedCmds.length-1 ){
-				
-			}
-
 			// Autoload functions..
 			eval( autoload( pipedCmdName ) );
 
@@ -84,6 +82,7 @@ function commandLine( path ){
 			codeToEval	= newCodeToEval;
 		}
 		try{
+			// Add an if statement here for redirection.. 
 			return eval( codeToEval );
 		} catch( e ){
 			var problemCommand	= codeToEval.split("(")[0];
