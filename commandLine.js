@@ -5,6 +5,7 @@ function commandLine( path ){
 	paths	= path.split(":");
 
 	function autoload( functionName ){
+
 		var contents	= false;
 		for( var k = 0; (k<paths.length && contents==false); k++ ){
 			var tmpContent	= "";
@@ -85,7 +86,7 @@ function commandLine( path ){
 		try{
 			return eval( codeToEval );
 		} catch( e ){
-			return "Command not found.";
+			return "Error: " + e;
 		}
 	}
 

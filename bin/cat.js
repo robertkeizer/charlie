@@ -1,17 +1,18 @@
-function cat( invar, outvar ){
+function cat( invar, tmpCatArgs ){
 
-        if( invar == "" ){
-                // cat a file
-                try{
-                        contents = fs.readFileSync( outvar.trim(), 'utf8' );
-                        return contents;
-                }catch( e ){
-                        return e;
-                }
-        }else{
-                if( outvar !== "" ){
-                        return "Invalid use of cat.";
-                }
-                return invar;
-        };
+	var files = tmpCatArgs.split(" ");
+	if( invar == "" ){
+		var returnVar = "";
+		for( var tmpCatFile=0; tmpCatFile<files.length; tmpCatFile++ ){
+			try{
+				tmpContents	= fs.readFileSync( files[tmpCatFile], 'utf8' );
+				returnVar	+= "\n" + tmpContents;
+			}catch( e ){
+				sys.puts( "Cat couldn't open the file " + files[tmpCatFile] + ", error: " + e );
+			}
+		}
+		return returnVar;
+	}else{
+		return invar;
+	}
 }
