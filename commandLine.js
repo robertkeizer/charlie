@@ -86,7 +86,8 @@ function commandLine( path ){
 		try{
 			return eval( codeToEval );
 		} catch( e ){
-			return "Error: " + e;
+			var problemCommand	= codeToEval.split("(")[0];
+			return "Error: " + problemCommand + ": " + e;
 		}
 	}
 

@@ -15,16 +15,11 @@ function ls( incontent, path ){
                 files   = fs.readdirSync( path );
                 var output = "";
                 for( var k=0; k<files.length; k++ ){
-			var lastOutputLineLength = output.split("\n")[output.split("\n").length-1].length;
-			if( (lastOutputLineLength + files[k].length + 1) > numColumns() ){
-				output += "\n" + files[k];
-			}else{
-				output += " " + files[k];
-			}
+			output += files[k] + "\n";
                 }
 		output	= output.trim();
                 return output;
         } catch( e ){
-                sys.puts( e );
+		throw e;
         }
 }
