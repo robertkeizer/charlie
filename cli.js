@@ -15,6 +15,11 @@ function cli( cliPath ){
 	// This parses and executes the command.
 	function executeCommand( commandToExecute ){
 
+		// Allow for the enter key to be pressed without an argument..
+		if( commandToExecute == "" ){
+			return "";
+		}
+
 		// Split by semicolons and call thyself!
 		var commandToExecuteSplitBySemicolons	= commandToExecute.split(";");
 		// This if makes sure infinite loops don't happen.
@@ -23,7 +28,7 @@ function cli( cliPath ){
 			var totalReturn	= "";
 			for( var tmpSemicolonCount=0; tmpSemicolonCount<commandToExecuteSplitBySemicolons.length; tmpSemicolonCount++ ){
 				if( commandToExecuteSplitBySemicolons[tmpSemicolonCount] != "" ){
-					totalReturn += executeCommand( commandToExecuteSplitBySemicolons[tmpSemicolonCount] );
+					totalReturn += executeCommand( commandToExecuteSplitBySemicolons[tmpSemicolonCount].trim() );
 				}
 			}
 			return totalReturn;
@@ -32,27 +37,50 @@ function cli( cliPath ){
 		// Split by pipes if need be..
 		var commandToExecuteSplitByBar = commandToExecute.split( "|" );
 
-		// Set the variable realCommandToExecute so that the next if statement doesn't has to in each.
-		var realCommandToExecute = "";
-
 		// We are piping..
 		if( commandToExecuteSplitByBar.length != 1 ){
 			// Go through each piped cmd.. 
 			// Use some sneaky code: alpha; bravo; charlie; becomes charlie( bravo( alpha( "", "" ), "" ), "" )
 			// So grab the output of each and feed it into the next..
+
+			var tmpRunningOutput	= "";
 			for( var tmpPipeCount=0; tmpPipeCount<commandToExecuteSplitByBar.length; tmpPipeCount++ ){
 				// commandToExecuteSplitByBar[tmpPipeCount] contains the individual command and arguments.
-			}
-		}else{
-			// Don't re-write any commands.
-			realCommandToExecute = commandToExecute;
-		}
+				var tmpPipedCommand	= commandToExecuteSplitByBar[tmpPipeCount].split(" ")[0];
+				
+				// Calcuate what the arguments for the particular command are..
+				var tmpPipedCommandArg	= commandToExecuteSplitByBar[tmpPipedCount].replace( RegExp( "^" + tmpPipedCommand + " " ), "" );
 
-		var tmpPath	= checkPathFor( realCommandToExecute.split( " " )[0] + '.js' );
-		if( !tmpPath ){
-			return "Command not found.\n";
+				// Check if the command exists..
+				var tmpPipedCommandPath	= checkPathFor( tmpPipedCommand + '.js' );
+				if( !tmpPipedCommandPath ){
+					return "Invalid command (" + tmpPipedCommand + ")\n";
+				}else{
+					// Initialize the command object. Notice the replace to get rid of the .js
+					var tmpPipedCommandObj	= require( "./" + tmpPipedCommandPath.replace( RegExp( "\.js$" ), "" ) );
+					// Run the command, grabing the output.
+					tmpRunningOutput	= tmpPipedCommandObj.run( tmpRunningOutput, tmpPipedCommandArg );
+				}
+			}
+
+			return tmpRunningOutput;
 		}else{
-			return "Found the file.." + tmpPath + "\n";
+			// No pipes.. simple command.
+			var tmpCommandName	= commandToExecute.split( " " )[0];
+
+			var tmpCommandPath	= checkPathFor( tmpCommandName + ".js" );
+
+			if( !tmpCommandPath ){
+				return "Invalid command (" + tmpCommandName + ")\n";
+			}else{
+				// Get the argument string on its own..
+				var tmpCommandArg	= commandToExecute.replace( RegExp( "^" + tmpCommandName + " " ), "" );
+
+				// Initialize the command object. The RegExp is to remove the .js at the end..
+				var tmpCommandObj	= require( "./" + tmpCommandPath.replace( RegExp( "\.js$" ),"") );
+				// Run the command.
+				return tmpCommandObj.run( "", tmpCommandArg );
+			}
 		}
 
 	}

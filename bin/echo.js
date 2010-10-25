@@ -7,5 +7,5 @@ exports.run	= function( incontent, args ){
 		returnVar += args;
 	}
 
-	return returnVar;
+	return returnVar + '\n';
 }
