@@ -26,11 +26,29 @@ function cli( cliPath ){
 					totalReturn += executeCommand( commandToExecuteSplitBySemicolons[tmpSemicolonCount] );
 				}
 			}
-
 			return totalReturn;
 		}
 
-		var tmpPath	= checkPathFor( commandToExecute.split( " " )[0] + '.js' );
+		// Split by pipes if need be..
+		var commandToExecuteSplitByBar = commandToExecute.split( "|" );
+
+		// Set the variable realCommandToExecute so that the next if statement doesn't has to in each.
+		var realCommandToExecute = "";
+
+		// We are piping..
+		if( commandToExecuteSplitByBar.length != 1 ){
+			// Go through each piped cmd.. 
+			// Use some sneaky code: alpha; bravo; charlie; becomes charlie( bravo( alpha( "", "" ), "" ), "" )
+			// So grab the output of each and feed it into the next..
+			for( var tmpPipeCount=0; tmpPipeCount<commandToExecuteSplitByBar.length; tmpPipeCount++ ){
+				// commandToExecuteSplitByBar[tmpPipeCount] contains the individual command and arguments.
+			}
+		}else{
+			// Don't re-write any commands.
+			realCommandToExecute = commandToExecute;
+		}
+
+		var tmpPath	= checkPathFor( realCommandToExecute.split( " " )[0] + '.js' );
 		if( !tmpPath ){
 			return "Command not found.\n";
 		}else{
@@ -40,7 +58,7 @@ function cli( cliPath ){
 	}
 
 	// Run through all the paths in cliPath. Return the path to the file in question
-	// if found, return false if not found in any of the paths.
+	// if found. Return false if not found in any of the paths.
 	function checkPathFor( filename ){
 		var returnPath	= false;
 		// Go through each path and check to see if the file exists.
