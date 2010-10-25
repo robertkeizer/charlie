@@ -34,6 +34,19 @@ function cli( cliPath ){
 			return totalReturn;
 		}
 
+
+		// Define a function that will only be used internally..
+		// This function actually loads the command as a module and runs it.
+		function blindExecCmd( inargs, command, args ){
+			var tmpPath	= checkPathFor( command + '.js' );
+			if( !tmpPath ){
+				return "Invalid command( " + command + " )\n";
+			}else{
+				var tmpCommandObj	= require( "./" + tmpPath );
+				return tmpCommandObj.run( inargs, args );
+			}
+		}
+
 		// Split by pipes if need be..
 		var commandToExecuteSplitByBar = commandToExecute.split( "|" );
 
@@ -49,38 +62,18 @@ function cli( cliPath ){
 				var tmpPipedCommand	= commandToExecuteSplitByBar[tmpPipeCount].split(" ")[0];
 				
 				// Calcuate what the arguments for the particular command are..
-				var tmpPipedCommandArg	= commandToExecuteSplitByBar[tmpPipedCount].replace( RegExp( "^" + tmpPipedCommand + " " ), "" );
+				var tmpPipedCommandArg	= commandToExecuteSplitByBar[tmpPipedCount].replace( RegExp( "^" + tmpPipedCommand ), "" ).trim();
 
-				// Check if the command exists..
-				var tmpPipedCommandPath	= checkPathFor( tmpPipedCommand + '.js' );
-				if( !tmpPipedCommandPath ){
-					return "Invalid command (" + tmpPipedCommand + ")\n";
-				}else{
-					// Initialize the command object. Notice the replace to get rid of the .js
-					var tmpPipedCommandObj	= require( "./" + tmpPipedCommandPath.replace( RegExp( "\.js$" ), "" ) );
-					// Run the command, grabing the output.
-					tmpRunningOutput	= tmpPipedCommandObj.run( tmpRunningOutput, tmpPipedCommandArg );
-				}
+				// Run the command through blindExecCmd..
+				tmpRunningOutput = blindExecCmd( tmpRunningOutput, tmpPipedCommand, tmpPipedCommandArg );
 			}
 
 			return tmpRunningOutput;
 		}else{
 			// No pipes.. simple command.
 			var tmpCommandName	= commandToExecute.split( " " )[0];
-
-			var tmpCommandPath	= checkPathFor( tmpCommandName + ".js" );
-
-			if( !tmpCommandPath ){
-				return "Invalid command (" + tmpCommandName + ")\n";
-			}else{
-				// Get the argument string on its own..
-				var tmpCommandArg	= commandToExecute.replace( RegExp( "^" + tmpCommandName + " " ), "" );
-
-				// Initialize the command object. The RegExp is to remove the .js at the end..
-				var tmpCommandObj	= require( "./" + tmpCommandPath.replace( RegExp( "\.js$" ),"") );
-				// Run the command.
-				return tmpCommandObj.run( "", tmpCommandArg );
-			}
+			var tmpCommandArg	= commandToExecute.replace( RegExp( "^" + tmpCommandName ), "" ).trim();
+			return blindExecCmd( "", tmpCommandName, tmpCommandArg );
 		}
 
 	}
