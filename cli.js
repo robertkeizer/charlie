@@ -15,7 +15,9 @@ function cli( cliPath ){
 	// This parses and executes the command.
 	function executeCommand( commandToExecute ){
 
-		// Do initial command parsing here.. such as pipes and redirects.
+		// Split by semicolons and call thyself!
+		
+		// Allow piping!
 
 		// This is not valid for anything but simple executions.. needs to be fixed ( the .split( " " )[0] .. )
 		var tmpPath	= checkPathFor( commandToExecute.split( " " )[0] + '.js' );
