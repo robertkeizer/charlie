@@ -16,15 +16,25 @@ function cli( cliPath ){
 	function executeCommand( commandToExecute ){
 
 		// Split by semicolons and call thyself!
-		
-		// Allow piping!
+		var commandToExecuteSplitBySemicolons	= commandToExecute.split(";");
+		// This if makes sure infinite loops don't happen.
+		if( commandToExecuteSplitBySemicolons.length != 1 ){
+			// Process everything before returning anything..
+			var totalReturn	= "";
+			for( var tmpSemicolonCount=0; tmpSemicolonCount<commandToExecuteSplitBySemicolons.length; tmpSemicolonCount++ ){
+				if( commandToExecuteSplitBySemicolons[tmpSemicolonCount] != "" ){
+					totalReturn += executeCommand( commandToExecuteSplitBySemicolons[tmpSemicolonCount] );
+				}
+			}
 
-		// This is not valid for anything but simple executions.. needs to be fixed ( the .split( " " )[0] .. )
+			return totalReturn;
+		}
+
 		var tmpPath	= checkPathFor( commandToExecute.split( " " )[0] + '.js' );
 		if( !tmpPath ){
-			process.stdout.write( 'Command not found.\n' );
+			return "Command not found.\n";
 		}else{
-			process.stdout.write( 'Found file.. "' + tmpPath + '"\n' );
+			return "Found the file.." + tmpPath + "\n";
 		}
 
 	}
@@ -50,7 +60,9 @@ function cli( cliPath ){
 	// simply trim it and send it off to executeCommand.
 	stdin.on( 'data', function( chunk ){
 		// Pass off to executeCommand. Trimming in the process.
-		executeCommand( chunk.trim() );
+		var tmpReturn = executeCommand( chunk.trim() );
+		// Display the result..
+		process.stdout.write( tmpReturn );
 		// Show the prompt again.
 		showPrompt( );
 	});
