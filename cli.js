@@ -5,11 +5,41 @@ stdin.setEncoding( 'utf8' );
 // Path is used for commandLinePaths..
 var path	= require( 'path' );
 
-function cli( cliPath ){
+function cli( inargs, cliPath ){
+
+	// Define an array of in-cli function command keywords.
+	// These commands will not look outside this script.
+	inCliFunctions	= [ "printenv", "setenv" ];
+
+	// A small function to check if needle is in haystack..
+	function in_array( needle, haystack ){
+		for( var counter=0;counter<haystack.length;counter++ ){
+			if( needle == haystack[counter] ){
+				return true;
+			}
+		}
+		return false;
+	}
 
 	// Simple function to show the prompt..
 	function showPrompt( ){
 		process.stdout.write( 'charlie>' );
+	}
+
+	// Show any variables that are in cliPath.
+	function printenv( incontent, args ){
+		return "cliPath: " + cliPath + "\n";
+	}
+
+	// Allow setting of certian in-cli variables.. such as path.
+	function setenv( incontent, args ){
+		var argsSplitBySpaces	= args.split( " " );
+		if( argsSplitBySpaces.length != 2 ){
+			return "Invalid use of setenv.\nUsage: setenv variable value\n";
+		}
+		
+		process.stdout.write( "DEBUG: evaling " + argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';\n" );
+		eval( argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';" );
 	}
 
 	// This parses and executes the command.
@@ -37,6 +67,12 @@ function cli( cliPath ){
 
 		// This function actually loads the command as a module and runs it.
 		function blindExecCmd( inargs, command, args ){
+
+			// A small hack to allow in-cli function calls.. not perfect yet.
+			if( in_array( command, inCliFunctions ) ){
+				// need to use RegExp and replace to remove single 's from inside inargs or args.
+				return eval( command + "('" + inargs + "','" + args + "')" );
+			}
 
 			var tmpPath	= checkPathFor( command + '.js' );
 
@@ -111,4 +147,4 @@ function cli( cliPath ){
 	});
 };
 
-cli( "bin/:sbin/" );
+cli( "", ".:bin/:sbin/" );
