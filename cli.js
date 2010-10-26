@@ -11,6 +11,9 @@ function cli( inargs, cliPath ){
 	// These commands will not look outside this script.
 	inCliFunctions	= [ "printenv", "setenv" ];
 
+	// The array of variables that setenv is allow to modify.
+	setenvVars	= [ "cliPath" ];
+
 	// A small function to check if needle is in haystack..
 	function in_array( needle, haystack ){
 		for( var counter=0;counter<haystack.length;counter++ ){
@@ -38,8 +41,12 @@ function cli( inargs, cliPath ){
 			return "Invalid use of setenv.\nUsage: setenv variable value\n";
 		}
 		
-		eval( argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';" );
-		return "";
+		if( in_array( argsSplitBySpaces[0], setenvVars ) ){
+			eval( argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';" );
+			return "";
+		}else{
+			return "Cannot set variable '" + argsSplitBySpaces[0] + "'\n";
+		}
 	}
 
 	// This parses and executes the command.
