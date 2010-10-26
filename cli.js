@@ -38,8 +38,8 @@ function cli( inargs, cliPath ){
 			return "Invalid use of setenv.\nUsage: setenv variable value\n";
 		}
 		
-		process.stdout.write( "DEBUG: evaling " + argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';\n" );
 		eval( argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';" );
+		return "";
 	}
 
 	// This parses and executes the command.
