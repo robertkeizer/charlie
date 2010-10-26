@@ -35,10 +35,11 @@ function cli( cliPath ){
 		}
 
 
-		// Define a function that will only be used internally..
 		// This function actually loads the command as a module and runs it.
 		function blindExecCmd( inargs, command, args ){
+
 			var tmpPath	= checkPathFor( command + '.js' );
+
 			if( !tmpPath ){
 				return "Invalid command( " + command + " )\n";
 			}else{
@@ -52,20 +53,18 @@ function cli( cliPath ){
 
 		// We are piping..
 		if( commandToExecuteSplitByBar.length != 1 ){
-			// Go through each piped cmd.. 
-			// Use some sneaky code: alpha; bravo; charlie; becomes charlie( bravo( alpha( "", "" ), "" ), "" )
-			// So grab the output of each and feed it into the next..
-
+			// Create a runningOutput variable so that it an be returned at the end.
 			var tmpRunningOutput	= "";
+			// Run through each of the pipedCommands..
 			for( var tmpPipeCount=0; tmpPipeCount<commandToExecuteSplitByBar.length; tmpPipeCount++ ){
-				// commandToExecuteSplitByBar[tmpPipeCount] contains the individual command and arguments.
-				var tmpPipedCommand	= commandToExecuteSplitByBar[tmpPipeCount].split(" ")[0];
-				
-				// Calcuate what the arguments for the particular command are..
-				var tmpPipedCommandArg	= commandToExecuteSplitByBar[tmpPipedCount].replace( RegExp( "^" + tmpPipedCommand ), "" ).trim();
-
+				// This includes the whole string.. command and args..
+				var wholePipedCommand	= commandToExecuteSplitByBar[tmpPipeCount].trim();
+				// Seperate out the command name by itself..
+				var tmpCommandName	= wholePipedCommand.split( " " )[0].trim();
+				// Seperate out the arguments from the whole command using the name..
+				var tmpCommandArgs	= wholePipedCommand.replace( RegExp( "^" + tmpCommandName ), "" ).trim();
 				// Run the command through blindExecCmd..
-				tmpRunningOutput = blindExecCmd( tmpRunningOutput, tmpPipedCommand, tmpPipedCommandArg );
+				tmpRunningOutput = blindExecCmd( tmpRunningOutput, tmpCommandName, tmpCommandArgs );
 			}
 
 			return tmpRunningOutput;
