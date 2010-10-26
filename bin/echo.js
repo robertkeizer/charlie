@@ -1,11 +1,7 @@
 exports.run	= function( incontent, args ){
-	returnVar = "";
-	if( incontent != "" ){
-		returnVar += incontent;
+	if( args.match( RegExp( "^-n" ) ){
+		return args;
+	}else{
+		return args + '\n';
 	}
-	if( args != "" ){
-		returnVar += args;
-	}
-
-	return returnVar + '\n';
 }
