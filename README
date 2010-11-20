@@ -1,1 +1,5 @@
 Command line interface written in javascript using nodejs.
+
+Built in commands are:
+	printenv
+	setenv

@@ -5,35 +5,46 @@ stdin.setEncoding( 'utf8' );
 // Path is used for commandLinePaths..
 var path	= require( 'path' );
 
-var cliPath;
+// fs is needed for redirections using > and >> to write and append to files.
+var fs		= require( 'fs' );
 
-function cli( inargs, cliPath ){
+// Declare the array used for variables in the command line.
+commandLineVars	= Array( );
+// Temporary hack to go along with the commandLineVars.. keep a string of the variable names seperated by commas.
+// This is only used in printenv. ( And set in setenv ).
+commandLineVarsIndex	= "";
+
+// Declare a simple function to map in_array from php.
+function in_array( needle, haystack ){
+	for( var c=0;c<haystack.length;c++ ){
+		if( needle == haystack[c] ){
+			return true;
+		}
+	}
+	return false;
+}
+
+// Simple function to show the prompt.
+function showPrompt( ){
+	process.stdout.write( 'charlie>' );
+}
+
+function cli( inargs, args ){
+	
+	// First off, the args should only contain the path.
+	setenv( "", "PATH " + args );
 
 	// Define an array of in-cli function command keywords.
 	// These commands will not look outside this script.
 	inCliFunctions	= [ "printenv", "setenv" ];
 
-	// The array of variables that setenv is allow to modify.
-	setenvVars	= [ "cliPath" ];
-
-	// A small function to check if needle is in haystack..
-	function in_array( needle, haystack ){
-		for( var counter=0;counter<haystack.length;counter++ ){
-			if( needle == haystack[counter] ){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// Simple function to show the prompt..
-	function showPrompt( ){
-		process.stdout.write( 'charlie>' );
-	}
-
-	// Show any variables that are in cliPath.
+	// Show any variables that are defined
 	function printenv( incontent, args ){
-		return "cliPath: " + cliPath + "\n";
+		var returnString = "";
+		commandLineVarsIndex.split(",").forEach( function( variableName ) {
+			returnString += variableName + " = " + commandLineVars[variableName] + "\n";
+		} );
+		return returnString;
 	}
 
 	// Allow setting of certian in-cli variables.. such as path.
@@ -43,12 +54,26 @@ function cli( inargs, cliPath ){
 			return "Invalid use of setenv.\nUsage: setenv variable value\n";
 		}
 		
-		if( in_array( argsSplitBySpaces[0], setenvVars ) ){
-			eval( argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';" );
-			return "";
+		commandLineVars[argsSplitBySpaces[0]]	= argsSplitBySpaces[1];
+
+		// This is the 2nd part of the temporary hack to keep a seperate index of variables that are declared.
+		if( commandLineVarsIndex == "" ){
+			commandLineVarsIndex += argsSplitBySpaces[0];
 		}else{
-			return "Cannot set variable '" + argsSplitBySpaces[0] + "'\n";
+			commandLineVarsIndex += ","+argsSplitBySpaces[0];
 		}
+
+		return "";
+	}
+
+	// A function to facilitate replacement of $var with the value of commandLineVars[var];
+	function replace_dollarsign_vars( command ){
+		returnString	= command;
+		// Loop through each of the variables that are set.
+		commandLineVarsIndex.split(",").forEach( function( variableName ){
+			returnString = returnString.replace( '$' + variableName, commandLineVars[variableName] );
+		});
+		return returnString;
 	}
 
 	// This parses and executes the command.
@@ -77,7 +102,8 @@ function cli( inargs, cliPath ){
 		// This function actually loads the command as a module and runs it.
 		function blindExecCmd( inargs, command, args ){
 
-			// A small hack to allow in-cli function calls.. not perfect yet.
+			// A small hack to allow in-cli function calls..
+			// These should be moved outside the cli.js file.
 			if( in_array( command, inCliFunctions ) ){
 				// need to use RegExp and replace to remove single 's from inside inargs or args.
 				return eval( command + "('" + inargs + "','" + args + "')" );
@@ -86,10 +112,54 @@ function cli( inargs, cliPath ){
 			var tmpPath	= checkPathFor( command + '.js' );
 
 			if( !tmpPath ){
-				return "Invalid command( " + command + " )\n";
+				return "Invalid command ( " + command + " )\n";
 			}else{
 				var tmpCommandObj	= require( "./" + tmpPath );
-				return tmpCommandObj.run( inargs, args );
+
+				// Check for redirection here. > and >>.
+				if( args.match( "^.*>>.*" ) ){
+					// Get the file to redirect to..
+					var fileToAppendTo	= args.replace( RegExp( ".*>>" ), "" ).trim();
+					// Check to see if the file is relative or absolute. If it is relative, add a ./before it.
+					if( !fileToAppendTo.match( "^(\.\/|\/)" ) ){
+						fileToAppendTo	= "./" + fileToAppendTo;
+					}
+					// Strip the appending '>> anything' from the args. The trailing trim() might cause problems later on.. 
+					var args		= args.replace( RegExp( ">>.*" ), "" ).trim();
+					// Now run the command but append the output to a file.
+					var tmpResult	= tmpCommandObj.run( inargs, replace_dollarsign_vars( args ) );
+					// Grab the content of the file already.
+					try{
+						var tmpContent	= fs.readFileSync( fileToAppendTo, 'utf8' );
+					}catch( e ){
+						// This accounts for no such file or directory errors that arise out of using redirections.
+					}
+
+					// Make the variable an empty string if nothing..
+					if( tmpContent == null ){
+						var tmpContent	= "";
+					}
+
+					fs.writeFileSync( fileToAppendTo, tmpContent+tmpResult, 'utf8' );
+					return "";
+				// Matching simple >
+				}else if( args.match( "^.*>.*" ) ){
+					// Get the file to write to.
+					var fileToWriteTo	= args.replace( RegExp( ".*>" ), "" ).trim();
+					// Prefix with a ./ if not absolute or already has ./
+					if( !fileToWriteTo.match( "^(\.\/|\/)" ) ){
+						fileToWriteTo = "./" + fileToWriteTo;
+					}
+					// Calculate the new arguments without the > anything
+					var args	= args.replace( RegExp( ">.*" ), "" ).trim();
+					// Run the command
+					var tmpResult	= tmpCommandObj.run( inargs, replace_dollarsign_vars( args ) );
+					// Save the output to a file.
+					fs.writeFileSync( fileToWriteTo, tmpResult, 'utf8' );
+					return "";
+				}else{
+					return tmpCommandObj.run( inargs,replace_dollarsign_vars( args ) );
+				}
 			}
 		}
 
@@ -127,7 +197,7 @@ function cli( inargs, cliPath ){
 	function checkPathFor( filename ){
 		var returnPath	= false;
 		// Go through each path and check to see if the file exists.
-		cliPath.split(":").forEach( function( singleCliPath ){
+		commandLineVars['PATH'].split(":").forEach( function( singleCliPath ){
 			if( path.existsSync( path.join( singleCliPath, filename ) ) ){
 				returnPath = path.join( singleCliPath, filename );
 			}
