@@ -51,8 +51,7 @@ function cli( inargs, args ){
 			return "Invalid use of setenv.\nUsage: setenv variable value\n";
 		}
 		
-		// Set the variable to the value.. 
-		eval( "commandLineVars['" + argsSplitBySpaces[0] + "'] = '" + argsSplitBySpaces[1] + "';" );
+		commandLineVars[argsSplitBySpaces[0]]	= argsSplitBySpaces[1];
 
 		// This is the 2nd part of the temporary hack to keep a seperate index of variables that are declared.
 		if( commandLineVarsIndex == "" ){
