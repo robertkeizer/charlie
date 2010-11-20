@@ -101,6 +101,9 @@ function cli( inargs, args ){
 		// This function actually loads the command as a module and runs it.
 		function blindExecCmd( inargs, command, args ){
 
+			// Replace variables using replace_dollarsign_vars.
+			args	= replace_dollarsign_vars( args );
+
 			// A small hack to allow in-cli function calls..
 			// These should be moved outside the cli.js file.
 			if( in_array( command, inCliFunctions ) ){
@@ -126,7 +129,7 @@ function cli( inargs, args ){
 					// Strip the appending '>> anything' from the args. The trailing trim() might cause problems later on.. 
 					var args		= args.replace( RegExp( ">>.*" ), "" ).trim();
 					// Now run the command but append the output to a file.
-					var tmpResult	= tmpCommandObj.run( inargs, replace_dollarsign_vars( args ) );
+					var tmpResult	= tmpCommandObj.run( inargs, args );
 					// Grab the content of the file already.
 					try{
 						var tmpContent	= fs.readFileSync( fileToAppendTo, 'utf8' );
@@ -152,12 +155,12 @@ function cli( inargs, args ){
 					// Calculate the new arguments without the > anything
 					var args	= args.replace( RegExp( ">.*" ), "" ).trim();
 					// Run the command
-					var tmpResult	= tmpCommandObj.run( inargs, replace_dollarsign_vars( args ) );
+					var tmpResult	= tmpCommandObj.run( inargs, args );
 					// Save the output to a file.
 					fs.writeFileSync( fileToWriteTo, tmpResult, 'utf8' );
 					return "";
 				}else{
-					return tmpCommandObj.run( inargs,replace_dollarsign_vars( args ) );
+					return tmpCommandObj.run( inargs, args );
 				}
 			}
 		}
