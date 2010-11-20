@@ -5,33 +5,43 @@ stdin.setEncoding( 'utf8' );
 // Path is used for commandLinePaths..
 var path	= require( 'path' );
 
-function cli( inargs, cliPath ){
+// Declare the array used for variables in the command line.
+commandLineVars	= Array( );
+// Temporary hack to go along with the commandLineVars.. keep a string of the variable names seperated by commas.
+// This is only used in printenv. ( And set in setenv ).
+commandLineVarsIndex	= "";
+
+// Declare a simple function to map in_array from php.
+function in_array( needle, haystack ){
+	for( var c=0;c<haystack.length;c++ ){
+		if( needle == haystack[c] ){
+			return true;
+		}
+	}
+	return false;
+}
+
+// Simple function to show the prompt.
+function showPrompt( ){
+	process.stdout.write( 'charlie>' );
+}
+
+function cli( inargs, args ){
+	
+	// First off, the args should only contain the path.
+	setenv( "", "PATH " + args );
 
 	// Define an array of in-cli function command keywords.
 	// These commands will not look outside this script.
 	inCliFunctions	= [ "printenv", "setenv" ];
 
-	// The array of variables that setenv is allow to modify.
-	setenvVars	= [ "cliPath" ];
-
-	// A small function to check if needle is in haystack..
-	function in_array( needle, haystack ){
-		for( var counter=0;counter<haystack.length;counter++ ){
-			if( needle == haystack[counter] ){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// Simple function to show the prompt..
-	function showPrompt( ){
-		process.stdout.write( 'charlie>' );
-	}
-
-	// Show any variables that are in cliPath.
+	// Show any variables that are defined
 	function printenv( incontent, args ){
-		return "cliPath: " + cliPath + "\n";
+		var returnString = "";
+		commandLineVarsIndex.split(",").forEach( function( variableName ) {
+			returnString += variableName + " = " + commandLineVars[variableName] + "\n";
+		} );
+		return returnString;
 	}
 
 	// Allow setting of certian in-cli variables.. such as path.
@@ -41,12 +51,17 @@ function cli( inargs, cliPath ){
 			return "Invalid use of setenv.\nUsage: setenv variable value\n";
 		}
 		
-		if( in_array( argsSplitBySpaces[0], setenvVars ) ){
-			eval( argsSplitBySpaces[0] + " = '" + argsSplitBySpaces[1] + "';" );
-			return "";
+		// Set the variable to the value.. 
+		eval( "commandLineVars['" + argsSplitBySpaces[0] + "'] = '" + argsSplitBySpaces[1] + "';" );
+
+		// This is the 2nd part of the temporary hack to keep a seperate index of variables that are declared.
+		if( commandLineVarsIndex == "" ){
+			commandLineVarsIndex += argsSplitBySpaces[0];
 		}else{
-			return "Cannot set variable '" + argsSplitBySpaces[0] + "'\n";
+			commandLineVarsIndex += ","+argsSplitBySpaces[0];
 		}
+
+		return "";
 	}
 
 	// This parses and executes the command.
@@ -75,7 +90,8 @@ function cli( inargs, cliPath ){
 		// This function actually loads the command as a module and runs it.
 		function blindExecCmd( inargs, command, args ){
 
-			// A small hack to allow in-cli function calls.. not perfect yet.
+			// A small hack to allow in-cli function calls..
+			// These should be moved outside the cli.js file.
 			if( in_array( command, inCliFunctions ) ){
 				// need to use RegExp and replace to remove single 's from inside inargs or args.
 				return eval( command + "('" + inargs + "','" + args + "')" );
@@ -84,7 +100,7 @@ function cli( inargs, cliPath ){
 			var tmpPath	= checkPathFor( command + '.js' );
 
 			if( !tmpPath ){
-				return "Invalid command( " + command + " )\n";
+				return "Invalid command ( " + command + " )\n";
 			}else{
 				var tmpCommandObj	= require( "./" + tmpPath );
 				return tmpCommandObj.run( inargs, args );
@@ -125,7 +141,7 @@ function cli( inargs, cliPath ){
 	function checkPathFor( filename ){
 		var returnPath	= false;
 		// Go through each path and check to see if the file exists.
-		cliPath.split(":").forEach( function( singleCliPath ){
+		commandLineVars['PATH'].split(":").forEach( function( singleCliPath ){
 			if( path.existsSync( path.join( singleCliPath, filename ) ) ){
 				returnPath = path.join( singleCliPath, filename );
 			}
