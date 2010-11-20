@@ -10,8 +10,7 @@ var fs		= require( 'fs' );
 
 // Declare the array used for variables in the command line.
 commandLineVars	= Array( );
-// Temporary hack to go along with the commandLineVars.. keep a string of the variable names seperated by commas.
-// This is only used in printenv. ( And set in setenv ).
+// Hack to go along with the commandLineVars.. keep a string of the variable names seperated by commas.
 commandLineVarsIndex	= "";
 
 // Declare a simple function to map in_array from php.
@@ -56,7 +55,7 @@ function cli( inargs, args ){
 		
 		commandLineVars[argsSplitBySpaces[0]]	= argsSplitBySpaces[1];
 
-		// This is the 2nd part of the temporary hack to keep a seperate index of variables that are declared.
+		// Hack to keep a seperate index of variables that are declared.
 		if( commandLineVarsIndex == "" ){
 			commandLineVarsIndex += argsSplitBySpaces[0];
 		}else{
