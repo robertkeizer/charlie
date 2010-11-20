@@ -112,6 +112,9 @@ function cli( inargs, args ){
 				return "Invalid command ( " + command + " )\n";
 			}else{
 				var tmpCommandObj	= require( "./" + tmpPath );
+
+				// Check for redirection here. > and >>.
+
 				return tmpCommandObj.run( inargs,replace_dollarsign_vars( args ) );
 			}
 		}
