@@ -5,6 +5,8 @@ stdin.setEncoding( 'utf8' );
 // Path is used for commandLinePaths..
 var path	= require( 'path' );
 
+var cliPath;
+
 function cli( inargs, cliPath ){
 
 	// Define an array of in-cli function command keywords.
