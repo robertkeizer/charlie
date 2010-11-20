@@ -64,6 +64,16 @@ function cli( inargs, args ){
 		return "";
 	}
 
+	// A function to facilitate replacement of $var with the value of commandLineVars[var];
+	function replace_dollarsign_vars( command ){
+		returnString	= command;
+		// Loop through each of the variables that are set.
+		commandLineVarsIndex.split(",").forEach( function( variableName ){
+			returnString = returnString.replace( '$' + variableName, commandLineVars[variableName] );
+		});
+		return returnString;
+	}
+
 	// This parses and executes the command.
 	function executeCommand( commandToExecute ){
 
@@ -103,7 +113,7 @@ function cli( inargs, args ){
 				return "Invalid command ( " + command + " )\n";
 			}else{
 				var tmpCommandObj	= require( "./" + tmpPath );
-				return tmpCommandObj.run( inargs, args );
+				return tmpCommandObj.run( inargs,replace_dollarsign_vars( args ) );
 			}
 		}
 
