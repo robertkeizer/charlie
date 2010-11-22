@@ -24,37 +24,33 @@ exports.run	=	function( inargs, args ){
 					}
 					// Check to see if the path exists..
 					var pathExists = false;
-					path.exists( filesToRemove[c], function( pathExists ){
-						// Path doesn't exist.. 
-						if( !pathExists ){
-							returnString	+= "'" + filesToRemove[c] + "' doesn't exist.\n";
-						}else{
-							var tmpStat	= fs.statSync( filesToRemove[c] );
-							// A directory was passed.
-							if( tmpStat.isDirectory() ){
-								// Check if -r flag was set.
-								if( removeDirectories ){
-									try{
-										fs.rmdirSync( filesToRemove[c] );
-									}catch( e ){
-										returnString += "'" + filesToRemove[c] + "' " + e + "\n";
-									}
-								}else{
-									returnString += "'" + filesToRemove[c] + "' is a directory. Specify -r to remove it.\n";
-								}
-								// A file was passed.
-							}else if( tmpStats.isFile() ){
+					if( !path.existsSync( filesToRemove[c] ) ){
+						returnString += "File " + filesToRemove[c] + " was not found.\n";
+					}else{
+						var tmpStats	=fs.statSync( filesToRemove[c] );
+						if( tmpStats.isDirectory() ){
+							// Check if -r flag was set.
+							if( removeDirectories ){
 								try{
-									fs.unlinkSync( filesToRemove[c] );
+									fs.rmdirSync( filesToRemove[c] );
 								}catch( e ){
-									returnString += "'" + filesToremove[c] + "' " + e + "\n";
+									returnString += "'" + filesToRemove[c] + "' " + e + "\n";
 								}
-							// Something else was passed.. don't do anything for now.
 							}else{
-								returnString += "'" + filesToRemove[c] + "' is not a directory or a file. Won't unlink.\n";
+								returnString += "'" + filesToRemove[c] + "' is a directory. Specify -r to remove it.\n";
 							}
+						// A file was passed.
+						}else if( tmpStats.isFile() ){
+							try{
+								fs.unlinkSync( filesToRemove[c] );
+							}catch( e ){
+								returnString += "'" + filesToremove[c] + "' " + e + "\n";
+							}
+						// Something else was passed.. don't do anything for now.
+						}else{
+							returnString += "'" + filesToRemove[c] + "' is not a directory or a file. Won't unlink.\n";
 						}
-					} );
+					}
 				// End of for loop.
 				}
 
