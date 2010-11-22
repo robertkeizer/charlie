@@ -116,7 +116,12 @@ function cli( inargs, args ){
 			if( !tmpPath ){
 				return "Invalid command ( " + command + " )\n";
 			}else{
-				var tmpCommandObj	= require( "./" + tmpPath );
+				// This if statement is for absolute paths..
+				if( tmpPath.match( "^\/" ) ){
+					var tmpCommandObj	= require( tmpPath );
+				}else{
+					var tmpCommandObj	= require( "./" + tmpPath );
+				}
 
 				// Check for redirection here. > and >>.
 				if( args.match( "^.*>>.*" ) ){
@@ -228,4 +233,4 @@ function cli( inargs, args ){
 	});
 };
 
-cli( "", ".:bin/:sbin/" );
+cli( "", ".:bin/:sbin/:/home/rob/src/charlie/bin" );
