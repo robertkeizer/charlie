@@ -1,12 +1,1 @@
 Command line interface written in javascript using nodejs.
-
-Shell features:
-	* pure javascript.
-	* pipelining using standard |.
-	* redirection using standard > and >>.
-	* built-in printenv and setenv.
-	* variable substitution. ( ie 'echo $PATH' )
-
-Some Examples:
-	ls bin | grep grep
-	echo Hello World > hi
