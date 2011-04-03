@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
 // Include required modules..
-var	tty		= require( 'tty' );
-var	fs		= require( 'fs' );
-var	path		= require( 'path' );
-var	util		= require( 'util' );
-var	arguments	= require( 'arguments' );
+var sys		= require( 'sys' );
+var tty		= require( 'tty' );
+var fs		= require( 'fs' );
+var path	= require( 'path' );
+var util	= require( 'util' );
+var vm		= require( 'vm' );
+var arguments	= require( 'arguments' );
 
 // Set some default variables..
 var	cliEnvironment	= Array( );
@@ -83,32 +85,38 @@ function main( ){
 		// Run special command or..
 		if( !specialCommand( char, key ) ){
 
-			// Don't count CTRL+* if it's not a special command..
-			if( !key.ctrl ){
-				// Append to the runningCommand variable.
-				runningCommand += char;
+			// Append to the runningCommand variable.
+			runningCommand += char;
 
-				// Show on stdout..
-				process.stdout.write( char );
-			}
+			// Show on stdout..
+			process.stdout.write( char );
 		}
 	} );
 
 	// If specialCommand execute and return true.. else return false.
 	function specialCommand( char, key ){
 
-		// CTRL+D to exit..
-		if( key.ctrl && key.name == 'd' ){
-			process.stdout.write( "Exiting..\n" );
-			process.exit( 0 );
+		// Order matters.. 
+		if( char == '|' ){
+			return false;
 		}
 
-		// CTRL+C to resetLine().. 
-		if( key.ctrl && key.name == 'c' ){
-			process.stdout.write("\n");
-			resetLine( );
+		// This if statement keeps undefined errors from happening since key doesn't always have ctrl defined.
+		if( typeof key.ctrl != 'undefined' ){
 
-			return true;
+			// CTRL+D to exit..
+			if( key.ctrl && key.name == 'd' ){
+				process.stdout.write( "Exiting..\n" );
+				process.exit( 0 );
+			}
+
+			// CTRL+C to resetLine().. 
+			if( key.ctrl && key.name == 'c' ){
+				process.stdout.write("\n");
+				resetLine( );
+
+				return true;
+			}
 		}
 
 		// Enter key pressed..
@@ -127,13 +135,40 @@ function main( ){
 	}
 
 	function executeCommand( cmdToExecute ){
-		var fileLocation	= findFile( cmdToExecute.split( " " )[0] );
+		// Split by semicolons to allow for multiple commands in one line..
+		var cmdsToExecute = cmdToExecute.split( ';' );
+		/*for( var tmpCmdCounter=0; tmpCmdCounter<cmdsToExecute.length; tmpCmdCounter++ ){
+			executeCommand( cmdsToExecute[tmpCmdCounter] );
+		}*/
 
-		if( !fileLocation ){
-			process.stdout.write( "\nCouldn't find command '" + cmdToExecute.split( " " )[0] + "'..\n" );
-		}else{
-			process.stdout.write( "\nFound file location of '" + fileLocation + "'..\n" );
+		var pipedCmdParts	= cmdToExecute.split( "|" );
+		
+		// Check to make sure files exist for all the first words ( commands ) in each pipedCmdParts..
+		for( var pipedCmdCounter=0; pipedCmdCounter<pipedCmdParts.length; pipedCmdCounter++ ){
+			var commandToCheck	= pipedCmdParts[pipedCmdCounter].split( " " )[0];
+			if( !findFile( commandToCheck ) ){
+				commandNotFound( commandToCheck );
+				return;
+			}
 		}
+
+		// Generate a nested debug line..
+		var debugLine	= "would eval something like this: ";
+
+		// Go through from the end to the front the commands.. 
+		for( var pipedCmdRevCounter=pipedCmdParts.length; pipedCmdRevCounter>=0; pipedCmdRevCounter-- ){
+			debugLine += pipedCmdParts[pipedCmdRevCounter].split( " " )[0] + "( ";
+		}
+
+		for( var pipedCmdCounter=0; pipedCmdCounter<pipedCmdCounter.length; pipedCmdCounter++ ){
+			debugLine += "'" + pipedCmdParts[pipedCmdCounter].replace( /.* /, "" ) + "' )";
+		}
+
+		process.stdout.write("\n" + debugLine + "\n" );
+	}
+
+	function commandNotFound( cmdName ){
+		process.stdout.write( "\nCommand '" + cmdName + "' not found.\n" );
 	}
 
 	function resetLine( ){
