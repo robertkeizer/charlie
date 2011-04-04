@@ -81,7 +81,7 @@ function main( ){
 
 	// On key press..
 	process.stdin.on( 'keypress', function( char, key ){
-		
+
 		// Run special command or..
 		if( !specialCommand( char, key ) ){
 
@@ -99,6 +99,14 @@ function main( ){
 		// Order matters.. 
 		if( char == '|' ){
 			return false;
+		}
+
+		if( key.name == 'backspace' ){
+			runningCommand	= runningCommand.replace( RegExp( /.$/ ), '' );
+			process.stdout.write( "\n" );
+			showPrefix( );
+			process.stdout.write( runningCommand );
+			return true;
 		}
 
 		// This if statement keeps undefined errors from happening since key doesn't always have ctrl defined.
