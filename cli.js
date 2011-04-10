@@ -4,8 +4,9 @@
 var sys		= require( 'sys' );
 var fs		= require( 'fs' );
 var path	= require( 'path' );
+var vm		= require( 'vm' );
 
-exports.cli	= function( pipedInput, environment, arguments ){
+exports.cli	= function( pipedInput, arguments ){
 	
 	// Resume the stdin readable stream..
 	process.stdin.resume( );
@@ -45,14 +46,19 @@ exports.cli	= function( pipedInput, environment, arguments ){
 	function doCommand( commandInput ){
 		var commandInputSplitBySpace	= commandInput.split( " " );
 		var firstCommand		= commandInputSplitBySpace[0];
-		
+		var commandArguments		= commandInput.replace( RegExp( "^" + firstCommand ), '' ).trim( );
+
 		var pathToFirstCommand		= findInPath( firstCommand );
 		if( !pathToFirstCommand ){
 			process.stdout.write( "Command '" + firstCommand + "' was not found.." );
 			return;
 		}
-		
-		process.stdout.write( "Would require file '" + pathToFirstCommand + "' .. " );
+
+		var sandbox	= { "environment": environment };
+
+		process.stdout.write(
+			vm.runInNewContext( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "')" )
+		);
 		return;
 	}
 
@@ -79,7 +85,7 @@ exports.cli	= function( pipedInput, environment, arguments ){
 	}
 }
 
-var environmentObj	= Array( );
-environmentObj["PATH"]	= ".:bin/";
+var environment		= Array( );
+environment["PATH"]	= ".:bin/";
 
-exports.cli( "", environmentObj, "" );
+exports.cli( "", "" );
