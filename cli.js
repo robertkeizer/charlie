@@ -54,7 +54,9 @@ exports.cli	= function( pipedInput, arguments ){
 			return;
 		}
 
-		var sandbox	= { "environment": environment, "require": require };
+		var sandbox	= { "env": env, "require": require };
+
+		console.log( sys.inspect( sandbox ) );
 
 		process.stdout.write(
 			vm.runInNewContext( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "')", sandbox )
@@ -67,7 +69,7 @@ exports.cli	= function( pipedInput, arguments ){
 	function findInPath( fileToFind ){
 		if( !fileToFind.match( "\.js$" ) ){ fileToFind += ".js" };
 
-		var paths	= environment["PATH"].split( ":" );
+		var paths	= env["PATH"].split( ":" );
 		for( var x=0; x<paths.length; x++ ){
 			try{
 				var pathContent	= fs.readdirSync( paths[x] );
@@ -89,7 +91,7 @@ exports.cli	= function( pipedInput, arguments ){
 	}
 }
 
-var environment		= Array( );
-environment["PATH"]	= "./:bin/";
+var env		= Array( );
+env["PATH"]	= "./:bin/";
 
 exports.cli( "", "" );
