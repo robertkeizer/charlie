@@ -144,9 +144,11 @@ function main( ){
 
 	function executeCommand( cmdToExecute ){
 		// Split by semicolons to allow for multiple commands in one line..
-		var cmdsToExecute = cmdToExecute.split( ';' );
-		/*for( var tmpCmdCounter=0; tmpCmdCounter<cmdsToExecute.length; tmpCmdCounter++ ){
-			executeCommand( cmdsToExecute[tmpCmdCounter] );
+		/*var cmdsToExecute = cmdToExecute.split( ';' );
+		if( cmdsToExecute.length > 0 ){
+			for( var tmpCmdCounter=0; tmpCmdCounter<cmdsToExecute.length; tmpCmdCounter++ ){
+				executeCommand( cmdsToExecute[tmpCmdCounter] );
+			}
 		}*/
 
 		var pipedCmdParts	= cmdToExecute.split( "|" );
@@ -155,21 +157,28 @@ function main( ){
 		for( var pipedCmdCounter=0; pipedCmdCounter<pipedCmdParts.length; pipedCmdCounter++ ){
 			var commandToCheck	= pipedCmdParts[pipedCmdCounter].split( " " )[0];
 			if( !findFile( commandToCheck ) ){
-				commandNotFound( commandToCheck );
-				return;
+			//	commandNotFound( commandToCheck );
+			//	return;
 			}
 		}
 
 		// Generate a nested debug line..
-		var debugLine	= "would eval something like this: ";
+		var debugLine	= "Debug line: ";
 
-		// Go through from the end to the front the commands.. 
-		for( var pipedCmdRevCounter=pipedCmdParts.length; pipedCmdRevCounter>=0; pipedCmdRevCounter-- ){
-			debugLine += pipedCmdParts[pipedCmdRevCounter].split( " " )[0] + "( ";
-		}
 
-		for( var pipedCmdCounter=0; pipedCmdCounter<pipedCmdCounter.length; pipedCmdCounter++ ){
-			debugLine += "'" + pipedCmdParts[pipedCmdCounter].replace( /.* /, "" ) + "' )";
+		process.stdout.write( "PipedCmdParts length is " + pipedCmdParts.length );
+
+		for( var pipeCount=0; pipeCount<pipedCmdParts.length; pipeCount++ ){
+			var firstPart;
+			var splitBySpaces	= pipedCmdParts[pipeCount].split( " " );
+
+			if( splitBySpaces.length > 0 ){
+				firstPart	= splitBySpaces[0];
+			}else{
+				firstPart	= pipedCmdParts[pipeCount];
+			}
+
+			debugLine	+= firstPart;
 		}
 
 		process.stdout.write("\n" + debugLine + "\n" );
