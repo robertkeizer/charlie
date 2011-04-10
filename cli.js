@@ -54,10 +54,10 @@ exports.cli	= function( pipedInput, arguments ){
 			return;
 		}
 
-		var sandbox	= { "environment": environment };
+		var sandbox	= { "environment": environment, "require": require };
 
 		process.stdout.write(
-			vm.runInNewContext( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "')" )
+			vm.runInNewContext( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "')", sandbox )
 		);
 		return;
 	}
@@ -73,7 +73,11 @@ exports.cli	= function( pipedInput, arguments ){
 				var pathContent	= fs.readdirSync( paths[x] );
 				for( var y=0; y<pathContent.length; y++ ){
 					if( fileToFind == pathContent[y] ){
-						return path.join( paths[x], pathContent[y] );
+						var fullpath	= path.join( paths[x], pathContent[y] );
+						if( !fullpath.match( RegExp( "^\." ) ) || !fullpath.match( RegExp( '^' + '/' ) ) ){
+							fullpath = "./" + fullpath;
+						}
+						return fullpath;
 					}
 				}
 			}catch( err ){
@@ -86,6 +90,6 @@ exports.cli	= function( pipedInput, arguments ){
 }
 
 var environment		= Array( );
-environment["PATH"]	= ".:bin/";
+environment["PATH"]	= "./:bin/";
 
 exports.cli( "", "" );
