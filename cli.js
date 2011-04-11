@@ -87,6 +87,6 @@ exports.cli	= function( pipedInput, arguments ){
 }
 
 environment		= Array( );
-environment["PATH"]	= "./:bin/:sbin/";
+environment["PATH"]	= "./:bin/";
 environment["PWD"]	= process.cwd();
 exports.cli( "", "" );
