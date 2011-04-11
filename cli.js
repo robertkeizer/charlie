@@ -43,6 +43,20 @@ exports.cli	= function( pipedInput, arguments ){
 
 	// Actually do the command.. ( parse and Execute the command - showing its output to process.stdout.. ).
 	function doCommand( commandInput ){
+
+		// Remove spaces at the beginning and end of the command..
+		commandInput	= commandInput.trim();
+
+		// Split by semicolons and recurse..
+		var semiSplit	= commandInput.split( ";" );
+		if( semiSplit.length > 1 ){
+			for( var x=0; x<semiSplit.length; x++ ){
+				if( semiSplit[x].trim() != "" ){
+					doCommand( semiSplit[x] );
+				}
+			}
+		}
+
 		var commandInputSplitBySpace	= commandInput.split( " " );
 		var firstCommand		= commandInputSplitBySpace[0];
 		var commandArguments		= commandInput.replace( RegExp( "^" + firstCommand ), '' ).trim( );
