@@ -39,9 +39,7 @@ exports.cli	= function( pipedInput, arguments ){
 		showPrompt( );
 	} );
 
-	process.stdin.on( 'end', function( ){
-		process.stdout.write( "\nGoodbye.\n" );
-	} );
+	process.stdin.on( 'end', function( ){ process.stdout.write("\n"); } );
 
 	// Actually do the command.. ( parse and Execute the command - showing its output to process.stdout.. ).
 	function doCommand( commandInput ){
@@ -89,6 +87,6 @@ exports.cli	= function( pipedInput, arguments ){
 }
 
 environment		= Array( );
-environment["PATH"]	= "./:bin/";
+environment["PATH"]	= "./:bin/:sbin/";
 environment["PWD"]	= process.cwd();
 exports.cli( "", "" );

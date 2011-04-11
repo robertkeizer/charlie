@@ -1,6 +1,8 @@
 var fs	= require( 'fs' );
 
 exports.ls = function( pipedInput, inputArgs ){
+
+	// This is for the path..
 	if( !inputArgs || inputArgs == "" ){
 		inputArgs = ".";
 	}
