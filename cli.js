@@ -84,25 +84,6 @@ exports.cli	= function( pipedInput, arguments ){
 			eval( fullCmd )
 		);
 		return;
-
-		/*
-
-		var commandInputSplitBySpace	= commandInput.split( " " );
-		var firstCommand		= commandInputSplitBySpace[0];
-		var commandArguments		= commandInput.replace( RegExp( "^" + firstCommand ), '' ).trim( );
-
-		var pathToFirstCommand		= findInPath( firstCommand );
-		if( !pathToFirstCommand ){
-			process.stdout.write( "Command '" + firstCommand + "' was not found.." );
-			return;
-		}
-
-		process.stdout.write( "" + 
-			eval( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "' )" )
-		);
-		return;
-
-		*/
 	}
 
 	// Find a file in the environment['PATH'] object's directories.. 
