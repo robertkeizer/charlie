@@ -58,18 +58,34 @@ exports.cli	= function( pipedInput, arguments ){
 		}
 
 		// Piping.. 
+		var fullCmd	= "";
 		var pipeSplit	= commandInput.split( "|" );
 		for( var x=0; x<pipeSplit.length; x++ ){
-			var tmpPipeSplitBySpace		= pipeSplit[x].split( " " );
-			var tmpPipeFirstCommand		= tmpPipeSplitBySpace[0];
-			var tmpPipeArguments		= pipeSplit[x].replace( RegExp( "^" + tmpPipeFirstCommand ), '' ).trim( );
+			var tmpPipeSplitBySpace		= pipeSplit[x].trim().split( " " );
+			var tmpPipeFirstCommand		= tmpPipeSplitBySpace[0].trim();
+			var tmpPipeArguments		= pipeSplit[x].trim().replace( RegExp( "^" + tmpPipeFirstCommand ), '' ).trim();
 
 			var tmpPathToFirstCommand	= findInPath( tmpPipeFirstCommand );
 			if( !tmpPathToFirstCommand ){
 				process.stdout.write( "Command '" + tmpPipeFirstCommand + "' was not found." );
 				return;
 			}
+
+			// First time around, make sure to include black quotes for input args..
+			if( fullCmd == "" ){
+				fullCmd = "require( '" + tmpPathToFirstCommand + "' )." + tmpPipeFirstCommand + "( '', '" + tmpPipeArguments + "' )";
+			}else{
+				fullCmd	= "require( '" + tmpPathToFirstCommand + "' )." + tmpPipeFirstCommand + "( " + fullCmd;
+				fullCmd = fullCmd + ", '" + tmpPipeArguments + "' )";
+			}
 		}
+
+		process.stdout.write( "" + 
+			eval( fullCmd )
+		);
+		return;
+
+		/*
 
 		var commandInputSplitBySpace	= commandInput.split( " " );
 		var firstCommand		= commandInputSplitBySpace[0];
@@ -85,6 +101,8 @@ exports.cli	= function( pipedInput, arguments ){
 			eval( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "' )" )
 		);
 		return;
+
+		*/
 	}
 
 	// Find a file in the environment['PATH'] object's directories.. 
