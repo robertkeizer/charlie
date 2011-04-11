@@ -57,6 +57,20 @@ exports.cli	= function( pipedInput, arguments ){
 			}
 		}
 
+		// Piping.. 
+		var pipeSplit	= commandInput.split( "|" );
+		for( var x=0; x<pipeSplit.length; x++ ){
+			var tmpPipeSplitBySpace		= pipeSplit[x].split( " " );
+			var tmpPipeFirstCommand		= tmpPipeSplitBySpace[0];
+			var tmpPipeArguments		= pipeSplit[x].replace( RegExp( "^" + tmpPipeFirstCommand ), '' ).trim( );
+
+			var tmpPathToFirstCommand	= findInPath( tmpPipeFirstCommand );
+			if( !tmpPathToFirstCommand ){
+				process.stdout.write( "Command '" + tmpPipeFirstCommand + "' was not found." );
+				return;
+			}
+		}
+
 		var commandInputSplitBySpace	= commandInput.split( " " );
 		var firstCommand		= commandInputSplitBySpace[0];
 		var commandArguments		= commandInput.replace( RegExp( "^" + firstCommand ), '' ).trim( );
