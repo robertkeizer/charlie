@@ -5,6 +5,7 @@ var sys		= require( 'sys' );
 var fs		= require( 'fs' );
 var path	= require( 'path' );
 var vm		= require( 'vm' );
+var util	= require( 'util' );
 
 exports.cli	= function( pipedInput, arguments ){
 	
@@ -54,12 +55,8 @@ exports.cli	= function( pipedInput, arguments ){
 			return;
 		}
 
-		var sandbox	= { "env": env, "require": require };
-
-		console.log( sys.inspect( sandbox ) );
-
-		process.stdout.write(
-			vm.runInNewContext( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "')", sandbox )
+		process.stdout.write( "" + 
+			eval( "require( '" + pathToFirstCommand + "' )." + firstCommand + "( '', '" + commandArguments + "' )" )
 		);
 		return;
 	}
@@ -69,7 +66,7 @@ exports.cli	= function( pipedInput, arguments ){
 	function findInPath( fileToFind ){
 		if( !fileToFind.match( "\.js$" ) ){ fileToFind += ".js" };
 
-		var paths	= env["PATH"].split( ":" );
+		var paths	= environment["PATH"].split( ":" );
 		for( var x=0; x<paths.length; x++ ){
 			try{
 				var pathContent	= fs.readdirSync( paths[x] );
@@ -91,7 +88,7 @@ exports.cli	= function( pipedInput, arguments ){
 	}
 }
 
-var env		= Array( );
-env["PATH"]	= "./:bin/";
-
+environment		= Array( );
+environment["PATH"]	= "./:bin/";
+environment["PWD"]	= process.cwd();
 exports.cli( "", "" );

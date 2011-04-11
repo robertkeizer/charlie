@@ -1,6 +1,9 @@
 var fs	= require( 'fs' );
 
 exports.ls = function( pipedInput, inputArgs ){
+	if( !inputArgs || inputArgs == "" ){
+		inputArgs = ".";
+	}
 	var returnString		= "";
 	var inputArgsSplitBySpace	= inputArgs.split( " " );
 	if( inputArgsSplitBySpace.length > 1 ){
