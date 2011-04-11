@@ -4,7 +4,7 @@ exports.ls = function( pipedInput, inputArgs ){
 
 	// This is for the path..
 	if( !inputArgs || inputArgs == "" ){
-		inputArgs = ".";
+		inputArgs = environment["PWD"];
 	}
 	var returnString		= "";
 	var inputArgsSplitBySpace	= inputArgs.split( " " );
