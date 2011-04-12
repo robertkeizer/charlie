@@ -113,7 +113,10 @@ exports.cli	= function( pipedInput, arguments ){
 	}
 }
 
+// Grab the absolute path to this cli.js, set paths accordingly.. 
+var absoluteDirPath	= process.argv[1].replace( RegExp( "\/cli\.js$" ), "" );
+
 environment		= Array( );
-environment["PATH"]	= "./:bin/";
+environment["PATH"]	= absoluteDirPath + ":" + absoluteDirPath + "/bin/";
 environment["PWD"]	= process.cwd();
 exports.cli( "", "" );
