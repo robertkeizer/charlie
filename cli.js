@@ -13,12 +13,16 @@ exports.cli	= function( pipedInput, arguments ){
 	process.stdin.resume( );
 	
 	// A function to show the prompt..
-	function showPrompt( ){
-		process.stdout.write( "\ncli>" );
+	function showPrompt( first ){
+		if( first ){
+			process.stdout.write( "cli>" );
+		}else{
+			process.stdout.write( "\ncli>" );
+		}
 	}
 
 	// Show the prompt for the first time.. 
-	showPrompt( );
+	showPrompt( true );
 
 	// When a line is recieved..
 	process.stdin.on( 'data', function( chunk ){
