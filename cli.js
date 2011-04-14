@@ -84,6 +84,8 @@ exports.cli	= function( pipedInput, arguments ){
 			}
 		}
 
+		// Ugly as heck.. 
+
 		process.stdout.write( "" + 
 			eval( fullCmd )
 		);
