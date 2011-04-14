@@ -1,3 +1,5 @@
 Command line interface written in javascript using nodejs.
 
 Currently supports multiple commands per line ( semicolon ). As well as piping.
+
+Requires node module 'linux-utils'.
