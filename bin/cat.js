@@ -13,7 +13,7 @@ exports.cat	= function( pipedArgs, inArgs ){
 
 	try{
 		var argSplit	= inArgs.split( " " );
-		if( argSplit > 1 ){
+		if( argSplit.length > 1 ){
 			argSplit.forEach( function( arg ){
 				returnString += exports.cat( '', arg );
 			} );
