@@ -26,6 +26,9 @@ exports.cli	= function( pipedInput, arguments ){
 
 	// When a line is recieved..
 	process.stdin.on( 'data', function( chunk ){
+
+		var showPromptDashN	= false;
+		
 		// Remove the trailing \n.. 
 		var escapedChunk = chunk.toString().replace( RegExp( "\n$" ), "" );
 
@@ -36,11 +39,16 @@ exports.cli	= function( pipedInput, arguments ){
 				doCommand( splitEscapedChunk[x] );
 			}
 		}else{
-			doCommand( escapedChunk );
+			// Don't bother executing doCommand for nothing..
+			if( escapedChunk == "" ){
+				showPromptDashN = true;
+			}else{
+				doCommand( escapedChunk );
+			}
 		}
 
 		// Show the prompt again.
-		showPrompt( );
+		showPrompt( showPromptDashN );
 	} );
 
 	process.stdin.on( 'end', function( ){ process.stdout.write("\n"); } );
