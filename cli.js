@@ -3,7 +3,8 @@
 // Include required modules..
 var fs		= require( 'fs' );
 var path	= require( 'path' );
-var vm		= require( 'vm' );
+var sys		= require( 'sys' );
+var spawn	= require( 'child_process' ).spawn;
 
 // Resume the stdin readable stream..
 process.stdin.resume( );
@@ -71,10 +72,14 @@ function executeCommand( commandInput ){
 		// should send whichever one the user chooses to pathToFile[0].. 
 	}
 
-	// This works for now. Will use child processes in the future.
-	var vmSandbox	= { 'environment': environment, 'require': require, 'process': process };
+	var commandArguments	= commandInput.replace( RegExp( commandSplit[0] ), "" ).trim().split( " " );
 
-	vm.runInNewContext( fs.readFileSync( pathToFile[0], 'utf8' ), vmSandbox, pathToFile[0] )
+	var childProc	= spawn( pathToFile[0], commandArguments );
+	console.log( "Child started with pid '" + childProc.pid + "'" );
+
+	childProc.on( 'exit', function( code, signal ){
+		console.log( "Child exited." );
+	} );
 }
 
 // Grab the absolute path to this cli.js, set paths accordingly.. 
