@@ -74,14 +74,10 @@ exports.cli	= function( pipedInput, arguments ){
 			// should send whichever one the user chooses to pathToFile[0].. 
 		}
 	
-		var vmSandbox	= { 'environment': environment, 'require': require };
+		var vmSandbox	= { 'environment': environment, 'require': require, 'process': process };
 
 
-		process.stdout.write( "" + 
-			vm.runInNewContext( fs.readFileSync( pathToFile[0], 'utf8' ), vmSandbox, pathToFile[0] )
-		);
-
-		return;
+		vm.runInNewContext( fs.readFileSync( pathToFile[0], 'utf8' ), vmSandbox, pathToFile[0] )
 	}
 }
 
