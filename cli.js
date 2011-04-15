@@ -4,7 +4,6 @@
 var fs		= require( 'fs' );
 var path	= require( 'path' );
 var vm		= require( 'vm' );
-var sys		= require( 'sys' );
 
 exports.cli	= function( pipedInput, arguments ){
 	
@@ -74,8 +73,8 @@ exports.cli	= function( pipedInput, arguments ){
 			// should send whichever one the user chooses to pathToFile[0].. 
 		}
 	
+		// This works for now. Will use child processes in the future.
 		var vmSandbox	= { 'environment': environment, 'require': require, 'process': process };
-
 
 		vm.runInNewContext( fs.readFileSync( pathToFile[0], 'utf8' ), vmSandbox, pathToFile[0] )
 	}
