@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 // Include required modules..
-var sys		= require( 'sys' );
 var fs		= require( 'fs' );
 var path	= require( 'path' );
 var vm		= require( 'vm' );
-var util	= require( 'util' );
+var sys		= require( 'sys' );
 
 exports.cli	= function( pipedInput, arguments ){
 	
@@ -69,7 +68,20 @@ exports.cli	= function( pipedInput, arguments ){
 			return;
 		}
 
-		console.log( "Got this far.. with pathToFile of '" + pathToFile + "'" );
+		if( pathToFile.length > 1 ){
+			// Prompt the user for which one?
+			// Right now just use the first on in the array.. This if statement
+			// should send whichever one the user chooses to pathToFile[0].. 
+		}
+	
+		var vmSandbox	= { 'environment': environment, 'require': require };
+
+
+		process.stdout.write( "" + 
+			vm.runInNewContext( fs.readFileSync( pathToFile[0], 'utf8' ), vmSandbox, pathToFile[0] )
+		);
+
+		return;
 	}
 }
 
@@ -77,9 +89,10 @@ exports.cli	= function( pipedInput, arguments ){
 var absoluteDirPath	= process.argv[1].replace( RegExp( "\/cli\.js$" ), "" );
 
 // Create an environment variable.
-environment		= Array( );
-environment["PATH"]	= absoluteDirPath + ":" + absoluteDirPath + "/bin/";
-environment["PWD"]	= process.cwd();
+environment			= Array( );
+environment["NODE_PATH"]	= process.execPath;
+environment["PATH"]		= absoluteDirPath + ":" + absoluteDirPath + "/bin/";
+environment["PWD"]		= process.cwd();
 
 // A function to look through environment[PATH] and find a specific file.
 function findInPath( fileToFind ){
