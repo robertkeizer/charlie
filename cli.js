@@ -72,10 +72,13 @@ function executeCommand( commandInput ){
 		// should send whichever one the user chooses to pathToFile[0].. 
 	}
 
+	// Grab the command arguments only..
 	var commandArguments	= commandInput.replace( RegExp( commandSplit[0] ), "" ).trim().split( " " );
 
-	console.log( "Spawning off.. also turning off stdin in parent." );
+	// Pause stdin traffic - on the parent..
 	process.stdin.pause();
+
+	// Spawn off the new command, passing the Fds of the parent..
 	var childProc	= spawn( pathToFile[0], commandArguments, {
 		customFds: [
 			process.stdin,
@@ -84,8 +87,8 @@ function executeCommand( commandInput ){
 		]
 	} );
 
+	// When the child exits, make sure to resume the parent stdin.. 
 	childProc.on( 'exit', function( code, signal ){
-		console.log( "Child exited." );
 		process.stdin.resume();
 	} );
 }
