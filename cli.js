@@ -74,11 +74,19 @@ function executeCommand( commandInput ){
 
 	var commandArguments	= commandInput.replace( RegExp( commandSplit[0] ), "" ).trim().split( " " );
 
-	var childProc	= spawn( pathToFile[0], commandArguments );
-	console.log( "Child started with pid '" + childProc.pid + "'" );
+	console.log( "Spawning off.. also turning off stdin in parent." );
+	process.stdin.pause();
+	var childProc	= spawn( pathToFile[0], commandArguments, {
+		customFds: [
+			process.stdin,
+			process.stdout,
+			process.stderr
+		]
+	} );
 
 	childProc.on( 'exit', function( code, signal ){
 		console.log( "Child exited." );
+		process.stdin.resume();
 	} );
 }
 
