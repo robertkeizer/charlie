@@ -39,8 +39,6 @@ process.stdin.on( 'data', function( chunk ){
 	}else{
 		executeCommand( chunkToUse );
 	}
-
-	showPrompt( );
 } );
 
 process.stdin.on( 'end', function( ){
@@ -62,7 +60,8 @@ function executeCommand( commandInput ){
 	var pathToFile		= findInPath( commandSplit[0] );
 	if( pathToFile == false ){
 		process.stdout.write( "The command '" + commandSplit[0] + "' was not found." );
-		dropLine( );
+		dropLine();
+		showPrompt();
 		return;
 	}
 
@@ -90,6 +89,7 @@ function executeCommand( commandInput ){
 	// When the child exits, make sure to resume the parent stdin.. 
 	childProc.on( 'exit', function( code, signal ){
 		process.stdin.resume();
+		showPrompt();
 	} );
 }
 
