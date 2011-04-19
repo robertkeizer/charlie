@@ -6,7 +6,7 @@ var pathToUse		= Array( );
 var returnString	= "";
 
 // process.argv[2] contains the first real argument passed..
-if( process.argv[2] == "" ){
+if( process.argv[2] == "" || process.argv[2] == null ){
 	pathToUse[0]	= ".";
 }else{
 	for( var x=2; x<process.argv.length; x++ ){

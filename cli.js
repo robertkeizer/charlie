@@ -74,6 +74,10 @@ function executeCommand( commandInput ){
 	// Grab the command arguments only..
 	var commandArguments	= commandInput.replace( RegExp( commandSplit[0] ), "" ).trim().split( " " );
 
+	if( commandArguments == "" ){
+		commandArguments = null;
+	}
+
 	// Pause stdin traffic - on the parent..
 	process.stdin.pause();
 
