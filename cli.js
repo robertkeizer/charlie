@@ -100,10 +100,7 @@ function executeCommand( commandInput ){
 // Grab the absolute path to this cli.js, set paths accordingly.. 
 var absoluteDirPath	= process.argv[1].replace( RegExp( "\/cli\.js$" ), "" );
 
-// Ammend the environment variable to include paths relative to this script..
-process.env["PATH"]	+= ":.:" + absoluteDirPath + "/bin/";
-
-// A function to look through environment[PATH] and find a specific file.
+// A function to look through process.env[PATH] and find a specific file.
 function findInPath( fileToFind ){
 	var returnArray	= Array( );
 	process.env["PATH"].split( ":" ).forEach( function( pathToSearch ){
