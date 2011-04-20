@@ -34,10 +34,10 @@ process.stdin.on( 'data', function( chunk ){
 	var chunkSplitSemi	= chunkToUse.split( ';' );
 	if( chunkSplitSemi.length > 1 ){
 		chunkSplitSemi.forEach( function( chunkPart ){
-			executeCommand( chunkPart );
+			parseCommand( chunkPart );
 		} );
 	}else{
-		executeCommand( chunkToUse );
+		parseCommand( chunkToUse );
 	}
 } );
 
@@ -47,48 +47,65 @@ process.stdin.on( 'end', function( ){
 	dropLine( );
 } );
 
-function executeCommand( commandInput ){
+function parseCommand( commandInput ){
+	// Trim the incoming input..
 	commandInput	= commandInput.trim();
 
-	if( commandInput.split( "|" ).length > 1 ){
-		process.stdout.write( "Piping is not yet implemented." );
+	// Split by bar.
+	var commandSplitByBar	= commandInput.split( "|" );
+
+	if( commandSplitByBar.length > 1 ){
+		// Piping.. 
+		// Create a stream instance here..
+
+		for( var x=0; x<commandSplitByBar.length; x++ ){
+			// run through executeCommand with the commands and arguments..
+			// change the customFds to be in a stream..
+		}
+
 		dropLine( );
+		showPrompt( );
 		return;
-	}	
+	}else{
+		// No pipes detected.. 
+		var commandSplit	= commandInput.split( " " );
+		var pathToFile		= findInPath( commandSplit[0] );
+		if( pathToFile == false ){
+			process.stdout.write( "The command '" + commandSplit[0] + "' was not found." );
+			dropLine();
+			showPrompt();
+			return;
+		}
 
-	var commandSplit	= commandInput.split( " " );
-	var pathToFile		= findInPath( commandSplit[0] );
-	if( pathToFile == false ){
-		process.stdout.write( "The command '" + commandSplit[0] + "' was not found." );
-		dropLine();
-		showPrompt();
-		return;
+		// Grab the command arguments only..
+		var commandArguments	= getCommandArguments( commandInput );
+
+		executeCommand( pathToFile[0], commandArguments, {
+			customFds: [
+				process.stdin,
+				process.stdout,
+				process.stderr
+			]
+		} );
 	}
+}
 
-	if( pathToFile.length > 1 ){
-		// Prompt the user for which one?
-		// Right now just use the first on in the array.. This if statement
-		// should send whichever one the user chooses to pathToFile[0].. 
-	}
-
-	// Grab the command arguments only..
-	var commandArguments	= commandInput.replace( RegExp( commandSplit[0] ), "" ).trim().split( " " );
-
+function getCommandArguments( inputCommand ){
+	var commandSplit	= inputCommand.split( " " );
+	var commandArguments	= inputCommand.replace( RegExp( commandSplit[0] ), "" ).trim().split( " " );
 	if( commandArguments == "" ){
 		commandArguments = null;
 	}
 
+	return commandArguments;
+}
+
+function executeCommand( pathToFile, commandArguments, optionsObj ){
 	// Pause stdin traffic - on the parent..
 	process.stdin.pause();
 
 	// Spawn off the new command, passing the Fds of the parent..
-	var childProc	= spawn( pathToFile[0], commandArguments, {
-		customFds: [
-			process.stdin,
-			process.stdout,
-			process.stderr
-		]
-	} );
+	var childProc	= spawn( pathToFile, commandArguments, optionsObj );
 
 	// When the child exits, make sure to resume the parent stdin.. 
 	childProc.on( 'exit', function( code, signal ){
